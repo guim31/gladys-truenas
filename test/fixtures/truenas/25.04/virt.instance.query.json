@@ -1,0 +1,62 @@
+[
+  {
+    "id": "homeassistant",
+    "name": "homeassistant",
+    "type": "VM",
+    "status": "RUNNING",
+    "cpu": "2",
+    "memory": 4294967296,
+    "autostart": true,
+    "environment": {},
+    "aliases": [],
+    "image": {
+      "architecture": "amd64",
+      "description": "Home Assistant OS",
+      "os": null,
+      "release": null,
+      "serial": null,
+      "type": null,
+      "variant": null,
+      "secureboot": null
+    },
+    "userns_idmap": null,
+    "raw": null,
+    "vnc_enabled": false,
+    "vnc_port": null,
+    "vnc_password": null,
+    "secure_boot": null,
+    "root_disk_size": null,
+    "root_disk_io_bus": null,
+    "storage_pool": "tank"
+  },
+  {
+    "id": "pihole",
+    "name": "pihole",
+    "type": "CONTAINER",
+    "status": "STOPPED",
+    "cpu": null,
+    "memory": null,
+    "autostart": false,
+    "environment": {},
+    "aliases": [],
+    "image": {
+      "architecture": "amd64",
+      "description": "Debian bookworm",
+      "os": "Debian",
+      "release": "bookworm",
+      "serial": null,
+      "type": null,
+      "variant": null,
+      "secureboot": null
+    },
+    "userns_idmap": null,
+    "raw": null,
+    "vnc_enabled": false,
+    "vnc_port": null,
+    "vnc_password": null,
+    "secure_boot": null,
+    "root_disk_size": null,
+    "root_disk_io_bus": null,
+    "storage_pool": "tank"
+  }
+]

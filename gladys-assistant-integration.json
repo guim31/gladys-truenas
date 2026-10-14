@@ -1,177 +1,510 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "TrueNAS",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Monitor a TrueNAS NAS: pools, disks, apps, VMs, alerts, CPU, memory and updates.",
+    "fr": "Surveillez un NAS TrueNAS : pools, disques, applications, VM, alertes, processeur, mémoire.",
+    "de": "Überwache ein TrueNAS-NAS: Pools, Festplatten, Apps, VMs, Warnungen, Prozessor, Speicher.",
+    "es": "Supervise un NAS TrueNAS: pools, discos, aplicaciones, VM, alertas, procesador, memoria."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-truenas:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-truenas/main/cover.png",
+  "categories": ["network"],
+  "transports": ["local"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Your TrueNAS",
+        "fr": "Votre TrueNAS",
+        "de": "Dein TrueNAS",
+        "es": "Su TrueNAS"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Gladys reads TrueNAS 25.04 or later over its local API (HTTPS). Create an API key for a user with the Read-only Administrator role, enter it below, then add the NAS, pools, disks, apps and VMs from the Discover tab. Not affiliated with iXsystems.",
+        "fr": "Gladys lit TrueNAS 25.04 ou plus récent par son API locale (HTTPS). Créez une clé d'API pour un utilisateur au rôle Administrateur en lecture seule, saisissez-la ci-dessous, puis ajoutez NAS, pools, disques, applications et VM depuis l'onglet Découverte. Non affilié à iXsystems.",
+        "de": "Gladys liest TrueNAS ab 25.04 über seine lokale API (HTTPS). Erstelle einen API-Schlüssel für einen Benutzer mit der Rolle Read-only Administrator, trage ihn unten ein und füge NAS, Pools, Festplatten, Apps und VMs im Tab „Entdecken“ hinzu. Nicht mit iXsystems verbunden.",
+        "es": "Gladys lee TrueNAS 25.04 o posterior mediante su API local (HTTPS). Cree una clave de API para un usuario con el rol Administrador de solo lectura, introdúzcala abajo y añada NAS, pools, discos, aplicaciones y VM desde la pestaña Descubrir. Sin relación con iXsystems."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://github.com/guim31/gladys-truenas/blob/main/docs/en.md",
+          "label": {
+            "en": "Setup guide",
+            "fr": "Guide d'installation",
+            "de": "Installationsanleitung",
+            "es": "Guía de instalación"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
+      "key": "address",
+      "type": "string",
       "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
+      "label": {
+        "en": "NAS address",
+        "fr": "Adresse du NAS",
+        "de": "NAS-Adresse",
+        "es": "Dirección del NAS"
+      },
+      "placeholder": {
+        "en": "192.168.1.20",
+        "fr": "192.168.1.20",
+        "de": "192.168.1.20",
+        "es": "192.168.1.20"
+      },
+      "description": {
+        "en": "IP address or name of the NAS, always reached over HTTPS: 192.168.1.20, truenas.local, or with its HTTPS port (192.168.1.20:8443).",
+        "fr": "Adresse IP ou nom du NAS, toujours joint en HTTPS : 192.168.1.20, truenas.local, ou avec son port HTTPS (192.168.1.20:8443).",
+        "de": "IP-Adresse oder Name des NAS, immer über HTTPS erreicht: 192.168.1.20, truenas.local oder mit seinem HTTPS-Port (192.168.1.20:8443).",
+        "es": "Dirección IP o nombre del NAS, siempre por HTTPS: 192.168.1.20, truenas.local o con su puerto HTTPS (192.168.1.20:8443)."
+      }
     },
     {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
+      "key": "api_key",
+      "type": "secret",
       "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
+      "label": {
+        "en": "API key",
+        "fr": "Clé d'API",
+        "de": "API-Schlüssel",
+        "es": "Clave de API"
+      },
+      "description": {
+        "en": "Created in TrueNAS under your user menu, API Keys. Never written in the logs.",
+        "fr": "Créée dans TrueNAS depuis le menu de votre utilisateur, Clés d'API. Jamais écrite dans les logs.",
+        "de": "In TrueNAS über dein Benutzermenü, API Keys, erstellt. Wird nie protokolliert.",
+        "es": "Creada en TrueNAS desde el menú de su usuario, API Keys. Nunca se escribe en los registros."
+      }
     },
     {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "key": "accept_self_signed",
+      "type": "boolean",
       "required": false,
-      "default": "celsius",
+      "default": false,
+      "label": {
+        "en": "Accept a self-signed certificate",
+        "fr": "Accepter un certificat auto-signé",
+        "de": "Selbstsigniertes Zertifikat akzeptieren",
+        "es": "Aceptar un certificado autofirmado"
+      },
+      "description": {
+        "en": "The certificate TrueNAS generates is self-signed. Tick only for a NAS on your local network.",
+        "fr": "Le certificat que génère TrueNAS est auto-signé. À cocher seulement pour un NAS de votre réseau local.",
+        "de": "Das von TrueNAS erzeugte Zertifikat ist selbstsigniert. Nur für ein NAS in deinem lokalen Netzwerk aktivieren.",
+        "es": "El certificado que genera TrueNAS es autofirmado. Márquelo solo para un NAS de su red local."
+      }
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "required": false,
+      "default": "60",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Fréquence de relevé",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "60",
+          "label": {
+            "en": "Every minute",
+            "fr": "Toutes les minutes",
+            "de": "Jede Minute",
+            "es": "Cada minuto"
+          }
+        },
+        {
+          "value": "120",
+          "label": {
+            "en": "Every 2 minutes",
+            "fr": "Toutes les 2 minutes",
+            "de": "Alle 2 Minuten",
+            "es": "Cada 2 minutos"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "Every 5 minutes",
+            "fr": "Toutes les 5 minutes",
+            "de": "Alle 5 Minuten",
+            "es": "Cada 5 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
-      "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
-      },
+      "key": "allow_app_control",
+      "type": "boolean",
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": false,
+      "label": {
+        "en": "Allow starting and stopping apps and VMs",
+        "fr": "Autoriser le démarrage et l'arrêt des applications et VM",
+        "de": "Starten und Stoppen von Apps und VMs erlauben",
+        "es": "Permitir iniciar y detener aplicaciones y VM"
+      },
+      "description": {
+        "en": "Off by default. Adds a Start / stop switch (Update in the Discover tab). The user of the key needs the APPS_WRITE and VM_WRITE roles.",
+        "fr": "Désactivé par défaut. Ajoute un interrupteur Marche / arrêt (Mettre à jour dans Découverte). L'utilisateur de la clé doit avoir les rôles APPS_WRITE et VM_WRITE.",
+        "de": "Standardmäßig aus. Fügt einen Schalter Start / Stopp hinzu (Aktualisieren im Tab „Entdecken“). Der Benutzer des Schlüssels braucht die Rollen APPS_WRITE und VM_WRITE.",
+        "es": "Desactivado por defecto. Añade un interruptor Encender / apagar (Actualizar en Descubrir). El usuario de la clave necesita los roles APPS_WRITE y VM_WRITE."
+      }
+    },
+    {
+      "key": "allow_power_actions",
+      "type": "boolean",
+      "required": false,
+      "default": false,
+      "label": {
+        "en": "Allow scenes to restart or shut down the NAS",
+        "fr": "Autoriser les scènes à redémarrer ou éteindre le NAS",
+        "de": "Szenen dürfen das NAS neu starten oder herunterfahren",
+        "es": "Permitir que las escenas reinicien o apaguen el NAS"
+      },
+      "description": {
+        "en": "Off by default. Needs a key of a full administrator. A shutdown NAS must be turned back on by hand (or Wake-on-LAN).",
+        "fr": "Désactivé par défaut. Exige la clé d'un administrateur complet. Un NAS éteint se rallume à la main (ou par Wake-on-LAN).",
+        "de": "Standardmäßig aus. Braucht den Schlüssel eines vollen Administrators. Ein heruntergefahrenes NAS wird von Hand (oder per Wake-on-LAN) eingeschaltet.",
+        "es": "Desactivado por defecto. Requiere la clave de un administrador completo. Un NAS apagado se enciende a mano (o por Wake-on-LAN)."
+      }
+    },
+    {
+      "key": "language",
+      "type": "select",
+      "required": false,
+      "default": "fr",
+      "label": {
+        "en": "Language of the names and states",
+        "fr": "Langue des noms et des états",
+        "de": "Sprache der Namen und Zustände",
+        "es": "Idioma de los nombres y estados"
+      },
+      "description": {
+        "en": "Gladys does not tell the integration your language: the feature names, the states and the scene variables use this one.",
+        "fr": "Gladys ne transmet pas votre langue à l'intégration : les noms des fonctionnalités, les états et les variables de scène utilisent celle-ci.",
+        "de": "Gladys teilt der Integration deine Sprache nicht mit: Funktionsnamen, Zustände und Szenenvariablen nutzen diese.",
+        "es": "Gladys no transmite su idioma a la integración: los nombres de las funciones, los estados y las variables de escena usan este."
+      },
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test_connection",
+      "timeout_seconds": 60,
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Reads the NAS now and tells what was found. Also tries again an API key refused before.",
+        "fr": "Lit le NAS maintenant et indique ce qui a été trouvé. Réessaie aussi une clé d'API refusée.",
+        "de": "Liest das NAS jetzt und zeigt, was gefunden wurde. Versucht auch einen abgelehnten API-Schlüssel erneut.",
+        "es": "Lee el NAS ahora e indica lo que se encontró. También vuelve a probar una clave de API rechazada."
+      }
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "pool_degraded",
+      "label": {
+        "en": "Pool degraded",
+        "fr": "Pool dégradé",
+        "de": "Pool beeinträchtigt",
+        "es": "Pool degradado"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "A ZFS pool is degraded, faulted, offline or has errors. Again if it gets worse.",
+        "fr": "Un pool ZFS est dégradé, en panne, hors ligne ou a des erreurs. De nouveau s'il empire.",
+        "de": "Ein ZFS-Pool ist beeinträchtigt, ausgefallen, offline oder hat Fehler. Erneut, wenn es schlimmer wird.",
+        "es": "Un pool ZFS está degradado, averiado, fuera de línea o tiene errores. De nuevo si empeora."
       },
       "fields": [
         {
-          "key": "device",
+          "key": "pool",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Pool",
+            "fr": "Pool",
+            "de": "Pool",
+            "es": "Pool"
+          },
+          "description": {
+            "en": "A pool device. Empty: every pool, added to Gladys or not.",
+            "fr": "Un appareil pool. Vide : tous les pools, ajoutés à Gladys ou non.",
+            "de": "Ein Pool-Gerät. Leer: alle Pools, ob zu Gladys hinzugefügt oder nicht.",
+            "es": "Un dispositivo de pool. Vacío: todos los pools, añadidos a Gladys o no."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "nas_name",
+          "type": "string",
+          "label": {
+            "en": "NAS",
+            "fr": "NAS",
+            "de": "NAS",
+            "es": "NAS"
+          }
         },
         {
-          "key": "target",
+          "key": "pool_name",
+          "type": "string",
+          "label": {
+            "en": "Pool",
+            "fr": "Pool",
+            "de": "Pool",
+            "es": "Pool"
+          }
+        },
+        {
+          "key": "state",
+          "type": "string",
+          "label": {
+            "en": "State",
+            "fr": "État",
+            "de": "Zustand",
+            "es": "Estado"
+          }
+        }
+      ]
+    },
+    {
+      "key": "new_alert",
+      "label": {
+        "en": "New TrueNAS alert",
+        "fr": "Nouvelle alerte TrueNAS",
+        "de": "Neue TrueNAS-Warnung",
+        "es": "Nueva alerta de TrueNAS"
+      },
+      "description": {
+        "en": "TrueNAS raised an alert (SMART, pool, update, certificate…). Once per alert.",
+        "fr": "TrueNAS a levé une alerte (SMART, pool, mise à jour, certificat…). Une fois par alerte.",
+        "de": "TrueNAS hat eine Warnung ausgelöst (SMART, Pool, Update, Zertifikat …). Einmal pro Warnung.",
+        "es": "TrueNAS ha generado una alerta (SMART, pool, actualización, certificado…). Una vez por alerta."
+      },
+      "fields": [
+        {
+          "key": "level",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Level (empty: any)",
+            "fr": "Niveau (vide : tous)",
+            "de": "Stufe (leer: beliebig)",
+            "es": "Nivel (vacío: cualquiera)"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "info",
+              "label": {
+                "en": "Info",
+                "fr": "Info",
+                "de": "Info",
+                "es": "Info"
+              }
+            },
+            {
+              "value": "notice",
+              "label": {
+                "en": "Notice",
+                "fr": "Notification",
+                "de": "Hinweis",
+                "es": "Aviso"
+              }
+            },
+            {
+              "value": "warning",
+              "label": {
+                "en": "Warning",
+                "fr": "Avertissement",
+                "de": "Warnung",
+                "es": "Advertencia"
+              }
+            },
+            {
+              "value": "error",
+              "label": {
+                "en": "Error",
+                "fr": "Erreur",
+                "de": "Fehler",
+                "es": "Error"
+              }
+            },
+            {
+              "value": "critical",
+              "label": {
+                "en": "Critical",
+                "fr": "Critique",
+                "de": "Kritisch",
+                "es": "Crítica"
+              }
+            },
+            {
+              "value": "alert",
+              "label": {
+                "en": "Alert",
+                "fr": "Alerte",
+                "de": "Alarm",
+                "es": "Alerta"
+              }
+            },
+            {
+              "value": "emergency",
+              "label": {
+                "en": "Emergency",
+                "fr": "Urgence",
+                "de": "Notfall",
+                "es": "Emergencia"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "nas_name",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "NAS",
+            "fr": "NAS",
+            "de": "NAS",
+            "es": "NAS"
+          }
+        },
+        {
+          "key": "level",
+          "type": "string",
+          "label": {
+            "en": "Level (info … emergency)",
+            "fr": "Niveau (info … emergency)",
+            "de": "Stufe (info … emergency)",
+            "es": "Nivel (info … emergency)"
+          }
+        },
+        {
+          "key": "text",
+          "type": "string",
+          "label": {
+            "en": "Text (in English)",
+            "fr": "Texte (en anglais)",
+            "de": "Text (auf Englisch)",
+            "es": "Texto (en inglés)"
+          }
+        },
+        {
+          "key": "alert_class",
+          "type": "string",
+          "label": {
+            "en": "Alert class",
+            "fr": "Classe d'alerte",
+            "de": "Warnungsklasse",
+            "es": "Clase de alerta"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "restart_nas",
+      "timeout_seconds": 30,
+      "label": {
+        "en": "Restart the TrueNAS NAS",
+        "fr": "Redémarrer le NAS TrueNAS",
+        "de": "TrueNAS-NAS neu starten",
+        "es": "Reiniciar el NAS TrueNAS"
       },
-      "timeout_seconds": 15,
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
-      "outputs": [
-        {
-          "key": "signalled",
-          "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
-        }
-      ]
+      "description": {
+        "en": "Restarts the NAS. Refused unless allowed in the configuration of the integration.",
+        "fr": "Redémarre le NAS. Refusé sauf autorisation dans la configuration de l'intégration.",
+        "de": "Startet das NAS neu. Abgelehnt, solange es in der Konfiguration der Integration nicht erlaubt ist.",
+        "es": "Reinicia el NAS. Rechazado salvo autorización en la configuración de la integración."
+      }
+    },
+    {
+      "key": "shutdown_nas",
+      "timeout_seconds": 30,
+      "label": {
+        "en": "Shut down the TrueNAS NAS",
+        "fr": "Éteindre le NAS TrueNAS",
+        "de": "TrueNAS-NAS herunterfahren",
+        "es": "Apagar el NAS TrueNAS"
+      },
+      "description": {
+        "en": "Shuts the NAS down. Refused unless allowed in the configuration of the integration.",
+        "fr": "Éteint le NAS. Refusé sauf autorisation dans la configuration de l'intégration.",
+        "de": "Fährt das NAS herunter. Abgelehnt, solange es in der Konfiguration der Integration nicht erlaubt ist.",
+        "es": "Apaga el NAS. Rechazado salvo autorización en la configuración de la integración."
+      }
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "nas",
+      "icon": "hard-drive",
+      "action_timeout_seconds": 60,
+      "label": {
+        "en": "TrueNAS",
+        "fr": "TrueNAS",
+        "de": "TrueNAS",
+        "es": "TrueNAS"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "CPU, memory and temperature, then alerts, pools and apps, problems first.",
+        "fr": "Processeur, mémoire et température, puis alertes, pools et applications, problèmes en tête.",
+        "de": "Prozessor, Speicher und Temperatur, dann Warnungen, Pools und Apps, Probleme zuerst.",
+        "es": "Procesador, memoria y temperatura, luego alertas, pools y aplicaciones, problemas primero."
+      }
     }
   ]
 }

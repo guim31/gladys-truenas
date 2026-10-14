@@ -1,0 +1,43 @@
+[
+  {
+    "disk": "sda",
+    "identifier": "{serial_lunid}TESTDISK0001_5000c500a1b2c3d4",
+    "tests": [
+      {
+        "num": 1,
+        "description": "Short offline",
+        "status": "SUCCESS",
+        "status_verbose": "Completed without error",
+        "remaining": 0.0,
+        "lifetime": 16590,
+        "lba_of_first_error": null
+      }
+    ],
+    "current_test": null
+  },
+  {
+    "disk": "sdb",
+    "identifier": "{serial_lunid}TESTDISK0002_5000c500a1b2c3d4",
+    "tests": [
+      {
+        "num": 1,
+        "description": "Short offline",
+        "status": "FAILED",
+        "status_verbose": "Completed: read failure",
+        "remaining": 0.9,
+        "lifetime": 16591,
+        "lba_of_first_error": 123456789
+      },
+      {
+        "num": 2,
+        "description": "Short offline",
+        "status": "SUCCESS",
+        "status_verbose": "Completed without error",
+        "remaining": 0.0,
+        "lifetime": 16400,
+        "lba_of_first_error": null
+      }
+    ],
+    "current_test": null
+  }
+]

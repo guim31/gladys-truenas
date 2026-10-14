@@ -1,8 +1,8 @@
 {
-  "name": "gladys-integration-template-js",
+  "name": "gladys-truenas",
   "version": "1.0.0",
   "private": true,
-  "description": "Official starter template to build an external integration for Gladys Assistant with the JavaScript SDK.",
+  "description": "Gladys Assistant integration for a TrueNAS NAS: pools, disks, apps, VMs, alerts and updates over the local API.",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -10,13 +10,15 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "node --test"
+    "test": "node --test",
+    "probe": "node scripts/probe.mjs"
   },
   "engines": {
     "node": ">=22"
   },
   "dependencies": {
-    "@gladysassistant/integration-sdk": "^0.15.0"
+    "@gladysassistant/integration-sdk": "^0.15.0",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

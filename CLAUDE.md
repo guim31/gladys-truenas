@@ -9,19 +9,22 @@ A Gladys Assistant **external integration**: a Node.js service (Node 22+, ESM,
 no build step) that runs in its own sandboxed Docker container and talks to
 Gladys through
 [`@gladysassistant/integration-sdk`](https://github.com/GladysAssistant/integration-sdk-js),
-its only runtime dependency. It started from the official JavaScript template.
+and reads a **TrueNAS** NAS over its JSON-RPC WebSocket API with
+[`ws`](https://github.com/websockets/ws) (already a dependency of the SDK).
+It started from the official JavaScript template.
 
 ## Commands
 
 ```bash
 npm install
 npm test                                  # node --test, the built-in runner
-node --test test/devices.test.js          # one file
-node --test --test-name-pattern "plug"    # tests whose name matches
+node --test test/hub.test.js              # one file
+node --test --test-name-pattern "pool"    # tests whose name matches
 npm run lint                              # ESLint
 npm run format:check                      # Prettier, as the CI runs it
 npm run format                            # Prettier, fix in place
 npx github:GladysAssistant/integration-store .   # store admission checks
+TRUENAS_URL=… TRUENAS_API_KEY=… npm run probe   # read-only probe of a real NAS
 ```
 
 The CI (`.github/workflows/ci.yml`) runs `format:check`, `lint` and `test` on
@@ -32,15 +35,23 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
-src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
+src/app.js                        registerHandlers: every SDK handler, switch, scene actions, widget
+src/hub.js                        the NAS hub: own timer, reads, scene events, states, commands
+src/devices.js                    the Gladys devices (NAS, pool, disk, app, VM) and their states
+src/watcher.js                    what the scene triggers compare with (pure bookkeeping)
+src/store.js                      /data/truenas-state.json: the trigger tables
+src/texts.js                      every text sent to Gladys, in en/fr/de/es
+src/widgets.js                    dashboard widget `nas`
 src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
+src/truenas/client.js             TrueNAS client: login, reconnection, reads, start/stop, power
+src/truenas/rpc.js                JSON-RPC 2.0 over one socket (ids, errors, timeouts)
+src/truenas/socket.js             the one function opening the WebSocket (`ws`, self-signed on option)
+src/truenas/model.js              API answers -> plain snapshot (states, SMART, update)
+scripts/probe.mjs                 read-only probe of a real NAS (no secret printed)
 gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+docs/{en,fr,de,es}.md             user documentation, same sections, re-hosted by Gladys
+test/                             node --test, against the SDK's fake Gladys and a fake TrueNAS
+test/fixtures/truenas/            answers rebuilt from the middleware API models (25.04, 25.10)
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,10 +81,13 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in four languages (English, French, German,
+  Spanish): action messages, manifest texts, feature names, widget texts, and
+  `docs/en.md`, `docs/fr.md`, `docs/de.md`, `docs/es.md` with the same
+  sections. `test/i18n.test.js` checks it.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
-  in English. Tests never touch the network.
+  in English. Tests never touch the network (a WebSocket server on the
+  loopback interface is the only exception, in `test/rpc.test.js`).
 
 ---
 
@@ -233,3 +247,55 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## TrueNAS (propre à ce dépôt)
+
+- **API** : JSON-RPC 2.0 sur WebSocket, `wss://<hôte>/api/current`, depuis TrueNAS **25.04**. L'API
+  REST v2.0 est dépréciée depuis 25.04 : non utilisée. TrueNAS CORE et SCALE 24.10 n'ont que l'ancien
+  protocole `/websocket` : non pris en charge (erreur « pas d'API TrueNAS 25.04+ »). Méthodes, champs
+  et valeurs relus dans `truenas/middleware` (LGPL-3.0 : lecture seule, rien de copié) aux tags
+  TS-25.04.2.6, TS-25.10.7 et TS-26.0.0-BETA.3 ; `api.truenas.com` est refusé par le proxy des
+  sessions de code.
+- **Clé d'API révoquée en HTTP** : TrueNAS **révoque une clé valide utilisée sur un transport non
+  sûr** (ni TLS, ni socket Unix, ni boucle locale) et répond `EXPIRED`. Une adresse `http://` ou
+  `ws://` est donc refusée dans `src/config.js` **avant toute connexion**. Ne jamais l'assouplir.
+- **Connexion** : `auth.login_with_api_key [clé]` → `true`/`false` (existe encore en 26.0 ; une clé
+  fausse, expirée ou révoquée donne `false` après 1 à 2 s). Une connexion gardée ouverte entre les
+  lectures (chaque login est une ligne d'audit) ; une connexion tombée ou une session oubliée
+  (`ENOTAUTHENTICATED`) est rouverte une fois. Clé refusée : jamais réessayée sur minuterie.
+- **Erreurs** : `-32601` = méthode absente de cette version (partie ignorée sans bruit) ; `-32001`
+  avec `data.errname` (`EACCES` = rôle manquant, `ENOTAUTHENTICATED`). Seul `system.info` est
+  obligatoire : toute autre partie refusée est laissée de côté, une ligne de log au début, une au
+  retour.
+- **Rôles** : _Read-only Administrator_ (`READONLY_ADMIN`) lit tout. `app.start/stop` exige
+  `APPS_WRITE`, `vm.*` `VM_WRITE`, `system.reboot/shutdown` **FULL_ADMIN**.
+- **Différences de versions** (`isLegacy` = avant 25.10) :
+  - mise à jour : `update.check_available` (25.04, `status: AVAILABLE`) / `update.status` (25.10+,
+    `status.new_version`). Les deux font interroger le serveur de mises à jour par le NAS : toutes les
+    6 h seulement ;
+  - **SMART** : `smart.test.results` en 25.04 ; **25.10 a retiré SMART de l'API** : l'état d'un disque
+    vient des alertes `SMART*` qui le nomment (numéro de série, sinon nom `sdX`) ;
+  - `disk.temperatures` : 25.04 `[noms, {powermode: 'STANDBY'}]` (smartctl, ne réveille pas un disque
+    endormi), 25.10+ `[[], false]` (sysfs, en cache 5 min) ;
+  - VM : `vm.query` partout ; `virt.instance.query` (Incus) en 25.04/25.10, retiré en 26.0 ;
+    `container.query` en 26.0. `virt.instance.stop` exige un `timeout` quand `force` est faux.
+- **Pas de méthode « CPU % maintenant »** : `reporting.netdata_get_data` sur les graphiques `cpu`
+  (colonne `cpu`), `memory` (colonne `available`, octets ; total = `system.info.physmem`) et
+  `cputemp` (une colonne par cœur), dernière ligne complète. Légendes non vérifiées sur un vrai NAS.
+- **Espace d'un pool** : `size/allocated/free` de `pool.query` comptent la parité RAIDZ ; l'espace
+  « utilisateur » vient du dataset racine (`pool.dataset.query`, `used`/`available.parsed`).
+- **Dates** : `{ "$date": ms }`. Un `scan` jamais lancé : valeurs nulles (25.x) ou `null` (26.0).
+  `bytes_to_process`/`bytes_processed` sont inversés côté middleware : ne pas s'en servir.
+- **Identité** : `system.host_id` (sha256 de `/etc/hostid`, stable aux mises à jour) tronqué à 16
+  caractères ; le numéro de série système est souvent vide sur un NAS monté soi-même. Disque : numéro
+  de série s'il est unique, sinon `identifier` ; app : son nom (fixé à l'installation) ; VM : son id.
+- **Jobs** : `app.start/stop`, `vm.stop`, `virt.instance.*`, `system.reboot/shutdown` sont des jobs ;
+  la connexion par défaut (`legacy_jobs`) rend l'id tout de suite, suivi par `core.get_jobs`.
+- **Interrupteur Marche / arrêt** : `read_only` ne fait pas partie de la signature de structure du
+  cœur (`structure_changed` ne voit que id, catégorie, type, unité, min, max, step) : l'option ajoute
+  donc une **fonctionnalité** `power` (proposée par « Mettre à jour »), et `onSetValue` revérifie
+  l'option à chaque appel.
+- **Tests** : TrueNAS est un système d'exploitation complet, impossible à lancer dans la session :
+  pas de `npm run test:real`. Les fixtures sont écrites à la main d'après les modèles d'API ;
+  `scripts/probe.mjs` les vérifie sur un vrai NAS (testé ici contre un serveur WSS local à certificat
+  auto-signé).

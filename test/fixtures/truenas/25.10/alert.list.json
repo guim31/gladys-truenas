@@ -1,0 +1,44 @@
+[
+  {
+    "uuid": "8c3c5a6e-0d1f-4c62-9d4b-1a2b3c4d5e01",
+    "id": "8c3c5a6e-0d1f-4c62-9d4b-1a2b3c4d5e01",
+    "source": "",
+    "klass": "HasUpdate",
+    "args": null,
+    "node": "Controller A",
+    "key": "null",
+    "datetime": {
+      "$date": 1791992800000
+    },
+    "last_occurrence": {
+      "$date": 1791992800000
+    },
+    "dismissed": false,
+    "mail": null,
+    "text": "A system update is available. Go to System Settings \u2192 Update to download and apply the update.",
+    "level": "INFO",
+    "formatted": "A system update is available. Go to System Settings \u2192 Update to download and apply the update.",
+    "one_shot": true
+  },
+  {
+    "uuid": "8c3c5a6e-0d1f-4c62-9d4b-1a2b3c4d5e02",
+    "id": "8c3c5a6e-0d1f-4c62-9d4b-1a2b3c4d5e02",
+    "source": "ScrubPaused",
+    "klass": "ScrubPaused",
+    "args": "backup",
+    "node": "Controller A",
+    "key": "\"backup\"",
+    "datetime": {
+      "$date": 1791913600000
+    },
+    "last_occurrence": {
+      "$date": 1791996400000
+    },
+    "dismissed": true,
+    "mail": null,
+    "text": "Scrub for pool %r is paused for more than 8 hours.",
+    "level": "WARNING",
+    "formatted": "Scrub for pool 'backup' is paused for more than 8 hours.",
+    "one_shot": false
+  }
+]

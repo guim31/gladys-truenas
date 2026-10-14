@@ -1,67 +1,222 @@
-# Template de démonstration
+# TrueNAS
 
-Ceci est la documentation utilisateur de l'intégration. Gladys ré-héberge ce
-fichier et affiche un lien **Documentation** permanent vers lui dans l'écran
-de configuration (dans la langue de l'utilisateur, avec l'anglais en repli) —
-c'est au moment de configurer que l'utilisateur en a le plus besoin. Gardez
-les courtes indications d'accueil dans les blocs `section` du `config_schema`
-du manifest ; mettez ici le pas-à-pas détaillé (captures d'écran, dépannage…).
+Cette intégration suit un NAS **TrueNAS** (Community Edition, anciennement
+SCALE, version 25.04 ou plus récente) depuis Gladys, par son API locale :
+processeur, mémoire, températures, pools ZFS, disques, applications, machines
+virtuelles, alertes et mises à jour. Elle déclenche des scènes quand un pool
+se dégrade ou quand TrueNAS lève une alerte, et met le NAS sur le tableau de
+bord.
+
+> **Non affiliée à iXsystems.** TrueNAS est une marque d'iXsystems, Inc.,
+> citée ici seulement pour décrire la compatibilité.
+
+> **Développée sans le matériel : retours bienvenus.** Aucun TrueNAS n'était
+> disponible pendant l'écriture de cette intégration : elle lit l'API telle
+> que le middleware de TrueNAS la décrit (25.04, 25.10 et 26.0), et a été
+> testée sur des réponses reconstruites à partir de lui. Dites-nous comment
+> elle se comporte sur votre NAS :
+> [github.com/guim31/gladys-truenas/issues](https://github.com/guim31/gladys-truenas/issues).
 
 ## Ce que vous obtenez
 
-Six appareils de démonstration apparaissent après l'installation : une
-station météo (vraies données Open-Meteo), un interrupteur, une lampe
-variable, une prise connectée avec mesure de puissance, un détecteur de
-mouvement et une caméra.
+Rien n'est créé à votre place : l'onglet **Découverte** de l'intégration
+liste le NAS, ses pools, disques, applications et machines virtuelles, et vous
+ajoutez ceux à suivre. Les noms des fonctionnalités et les états sont dans la
+langue choisie dans la configuration.
+
+### Le NAS
+
+| Fonctionnalité               | Ce qu'elle indique                                                             |
+| ---------------------------- | ------------------------------------------------------------------------------ |
+| En ligne                     | 1 tant que le NAS répond, 0 après deux lectures échouées de suite              |
+| Processeur                   | Utilisation du processeur, en %                                                |
+| Mémoire                      | Mémoire utilisée, en % (le cache ZFS compte comme utilisé, comme dans TrueNAS) |
+| Température du processeur    | Le cœur le plus chaud, en °C (absente sur un NAS sans sonde)                   |
+| Durée de fonctionnement      | En jours                                                                       |
+| Version de TrueNAS           | ex. 25.10.1                                                                    |
+| Mise à jour disponible       | 1 quand TrueNAS propose une version plus récente (vérifié toutes les 6 heures) |
+| Alertes actives              | Le nombre d'alertes non ignorées                                               |
+| Niveau d'alerte le plus haut | Aucune, Info, Notification, Avertissement, Erreur, Critique, Alerte ou Urgence |
+
+### Pools
+
+Un appareil par pool ZFS :
+
+| Fonctionnalité                | Ce qu'elle indique                                                                 |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| État                          | En ligne, Erreurs, Dégradé, Hors ligne, En panne, Indisponible, Retiré ou Suspendu |
+| Alerte                        | 1 quand l'état n'est pas En ligne                                                  |
+| Espace utilisé                | En %, compté comme la page Stockage de TrueNAS (parité exclue)                     |
+| Espace libre                  | En Go                                                                              |
+| Capacité                      | En Go, utilisé plus libre                                                          |
+| Jours depuis le dernier scrub | Depuis la fin du dernier scrub terminé                                             |
+| Erreurs du dernier scrub      | Les erreurs trouvées par ce scrub                                                  |
+
+_Erreurs_ signifie que le pool est en ligne, mais que ZFS a vu des erreurs de
+lecture, d'écriture ou de somme de contrôle sur l'un de ses disques.
+
+### Disques
+
+Un appareil par disque, nommé d'après son numéro de série (le nom sda, sdb…
+change au redémarrage) :
+
+| Fonctionnalité | Ce qu'elle indique                                                                    |
+| -------------- | ------------------------------------------------------------------------------------- |
+| Température    | En °C, lue toutes les 5 minutes ; la dernière valeur reste pendant que le disque dort |
+| État           | Aucune alerte SMART, Alerte SMART ou Test SMART échoué                                |
+| Alerte         | 1 sur une alerte SMART ou un test SMART échoué                                        |
+
+TrueNAS 25.10 a retiré les tests SMART de son API : l'état vient des alertes
+SMART que TrueNAS lève pour le disque. En 25.04, un dernier autotest échoué
+compte aussi.
+
+### Applications et machines virtuelles
+
+Un appareil par application et par machine virtuelle (et, en 25.04 et 25.10,
+par instance ou conteneur Incus) :
+
+| Fonctionnalité         | Ce qu'elle indique                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| En marche              | 1 quand elle tourne                                                                         |
+| État                   | En marche, Arrêté, Déploiement, Démarrage, Arrêt en cours, Planté, En pause ou Erreur       |
+| Mise à jour disponible | Applications seulement : nouvelle version de l'application ou de son image                  |
+| Marche / arrêt         | Seulement avec **Autoriser le démarrage et l'arrêt des applications et VM** (voir plus bas) |
+
+Arrêter une VM, c'est l'arrêt propre, jamais une coupure forcée.
+
+## Avant de commencer
+
+### Version de TrueNAS
+
+TrueNAS **25.04 ou plus récent** (Community Edition, anciennement SCALE).
+L'API JSON-RPC qu'utilise cette intégration n'existe ni sur TrueNAS CORE ni
+sur SCALE 24.10 et antérieurs.
+
+### Un utilisateur et une clé d'API
+
+1. Dans TrueNAS, **Credentials → Users → Add** : un utilisateur `gladys`,
+   avec le rôle _Read-only Administrator_ (le groupe de privilèges intégré
+   `truenas_readonly_administrators`). Ni shell ni accès SMB nécessaires.
+2. Connectez-vous avec cet utilisateur (ou en administrateur, pour cet
+   utilisateur), ouvrez le menu utilisateur en haut à droite, **API Keys →
+   Add**, et copiez la clé : TrueNAS ne l'affiche qu'une fois.
+
+Une clé en lecture seule suffit pour tout, sauf les commandes :
+
+- démarrer et arrêter applications et VM exige un utilisateur avec les rôles
+  `APPS_WRITE` et `VM_WRITE` (un privilège personnalisé) ;
+- redémarrer et éteindre le NAS exige un administrateur complet.
+
+### HTTPS et le certificat
+
+TrueNAS **révoque une clé d'API utilisée en HTTP simple** : cette intégration
+ne parle qu'en HTTPS (WebSocket sécurisé) et refuse une adresse commençant
+par `http://`. Le certificat que génère TrueNAS est auto-signé : cochez
+**Accepter un certificat auto-signé**, ou installez un certificat que Gladys
+peut vérifier.
 
 ## Configuration
 
-1. Ouvrez l'onglet **Configuration** de l'intégration.
-2. Renseignez la **latitude** et la **longitude** que la station météo de
-   démonstration doit observer (Paris par défaut), et choisissez votre unité
-   de température. L'**intervalle de rafraîchissement** règle la fréquence
-   de lecture de la station météo et de la puissance de la prise : toutes
-   les 5 minutes par défaut, toutes les minutes au plus.
-3. Enregistrez : les appareils apparaissent dans l'onglet **Découverte**,
-   prêts à être ajoutés.
+| Champ                                                    | Défaut             | Remarques                                               |
+| -------------------------------------------------------- | ------------------ | ------------------------------------------------------- |
+| Adresse du NAS                                           |                    | `192.168.1.20`, `truenas.local`, ou avec son port HTTPS |
+| Clé d'API                                                |                    | Jamais écrite dans les logs                             |
+| Accepter un certificat auto-signé                        | non                | Pour un NAS de votre réseau local                       |
+| Fréquence de relevé                                      | toutes les minutes | Toutes les 1, 2 ou 5 minutes                            |
+| Autoriser le démarrage et l'arrêt des applications et VM | non                | Ajoute l'interrupteur Marche / arrêt                    |
+| Autoriser les scènes à redémarrer ou éteindre le NAS     | non                | Exige la clé d'un administrateur complet                |
+| Langue des noms et des états                             | français           | Gladys ne transmet pas votre langue à l'intégration     |
 
-Le réglage **Préférer la connexion locale** pilote la prise de
-démonstration : elle affiche en badge le canal réellement utilisé (local ou
-cloud), avec un point orange quand elle fonctionne en mode dégradé (local
-refusé, bascule cloud).
+Enregistrez, puis utilisez **Tester la connexion** : elle lit le NAS tout de
+suite et indique ce qu'elle a trouvé (version, pools, disques, applications,
+VM, alertes). Elle réessaie aussi une clé refusée.
 
-## Actions
+Activer **Autoriser le démarrage et l'arrêt des applications et VM** ajoute
+une fonctionnalité aux applications et VM déjà ajoutées : ouvrez l'onglet
+**Découverte** et appuyez sur **Mettre à jour** pour chacune. La désactiver
+refuse l'interrupteur aussitôt.
 
-- **Tester le fournisseur météo** — effectue une requête en direct vers
-  Open-Meteo et affiche la température et l'humidité actuelles sous le
-  bouton.
-- **Identifier un appareil** — choisissez un de vos appareils dans la liste
-  et il se signale (la lampe de démonstration « clignote » dans les logs).
+## Widget du tableau de bord
 
-## Scènes
+Le widget **TrueNAS** montre les jauges du processeur et de la mémoire et la
+température du processeur, puis, problèmes en tête : les alertes actives les
+plus graves, un pool qui n'est pas en ligne, un disque avec une alerte SMART,
+une application plantée, la mise à jour proposée ; ensuite chaque pool avec
+son occupation et son espace libre, les applications et VM en marche, et la
+durée de fonctionnement. **Actualiser** relit le NAS aussitôt. Il ne demande
+aucun appareil ajouté.
 
-L'intégration ajoute ses propres cartes à l'éditeur de scènes (Gladys 5.1
-ou plus récent), dans la catégorie **Intégrations** :
+## Déclencheurs de scène
 
-- **Mouvement détecté** (déclencheur) — lance la scène quand un détecteur
-  de démonstration voit bouger quelque chose. Choisissez éventuellement le
-  détecteur et ce qui a bougé (personne, animal) ; laissés vides, toute
-  détection correspond. Les actions suivantes peuvent lire ce qui a bougé
-  avec `{{triggerEvent.data.target}}`.
-- **Identifier un appareil** (action) — fait se signaler l'appareil choisi.
-  Elle indique si l'appareil a pu se signaler, pour que les actions
-  suivantes puissent en dépendre.
+**Pool dégradé** : un pool passe de En ligne à Erreurs, Dégradé, Hors ligne,
+En panne, Indisponible, Retiré ou Suspendu, et de nouveau s'il empire (de
+Dégradé à En panne). Filtre : un pool, ou tous. Variables : le NAS, le pool,
+son état.
 
-## Tableau de bord
+**Nouvelle alerte TrueNAS** : TrueNAS a levé une alerte (une erreur SMART, un
+pool, une mise à jour, un certificat qui va expirer…), une fois par alerte.
+Filtre : les niveaux (de Info à Urgence ; vide pour tous). Variables : le
+NAS, le niveau (`info` … `emergency`), le texte de l'alerte (en anglais, tel
+que TrueNAS l'écrit) et sa classe (ex. `SMARTUncorrectedErrors`).
 
-Ajoutez le widget **État de la démo** à un tableau de bord : il affiche en
-direct la température de la station météo et la puissance de la prise du
-bureau, la connexion utilisée par la prise (en orange si dégradée) et la
-position observée. Son bouton **Identifier la lampe** fait se signaler la
-lampe de démonstration.
+Les deux se déclenchent sur les transitions seulement, pour les pools et
+alertes ajoutés à Gladys ou non, et se souviennent de ce qu'ils ont annoncé
+après un redémarrage : les alertes présentes à l'installation ne sont pas
+annoncées.
+
+## Actions de scène
+
+**Redémarrer le NAS TrueNAS** et **Éteindre le NAS TrueNAS** sont refusées
+tant que **Autoriser les scènes à redémarrer ou éteindre le NAS** n'est pas
+coché, et exigent la clé d'un administrateur complet. Un NAS éteint se
+rallume à la main, ou par Wake-on-LAN.
+
+## Idées de scènes
+
+- **Nouvelle alerte TrueNAS**, niveaux Erreur à Urgence → envoyer le texte de
+  l'alerte sur votre téléphone : _« {{triggerEvent.data.nas_name}} :
+  {{triggerEvent.data.text}} »_.
+- **Pool dégradé** → un message, et une lumière rouge dans le bureau jusqu'à
+  la réparation.
+- Chaque premier dimanche du mois, si **Jours depuis le dernier scrub** d'un
+  pool dépasse 35 → vous rappeler de vérifier les tâches de scrub.
+- **Niveau d'alerte le plus haut** vaut Critique le matin → l'annoncer sur
+  l'enceinte.
+
+## Fréquence de lecture du NAS
+
+À chaque relevé (toutes les minutes par défaut), sur un WebSocket gardé
+ouvert entre deux lectures : les informations système, trois graphiques de
+supervision (processeur, mémoire, température du processeur), les alertes,
+les pools et leur dataset racine, les applications et les VM : une dizaine
+d'appels légers. Les disques et leurs températures toutes les 5 minutes ; la
+recherche de mise à jour toutes les 6 heures (elle fait interroger le serveur
+de mises à jour de TrueNAS par le NAS). Seules les valeurs qui changent sont
+envoyées à Gladys, chaque valeur de nouveau au bout de 6 heures.
 
 ## Dépannage
 
-L'intégration journalise tout ce qu'elle fait : consultez les logs de
-l'intégration depuis l'interface Gladys (ou `docker logs` sur l'hôte) avec
-`LOG_LEVEL=debug` pour le détail complet.
+- **Clé d'API refusée** : fausse, expirée ou révoquée. Une clé utilisée une
+  seule fois en `http://` est révoquée par TrueNAS (une alerte _API key
+  revoked_ le dit) : créez-en une autre, et gardez l'adresse sans `http://`.
+- **Certificat HTTPS refusé** : cochez **Accepter un certificat auto-signé**.
+- **Pas d'API TrueNAS 25.04+ à cette adresse** : un TrueNAS plus ancien,
+  TrueNAS CORE, ou un autre port (le port HTTPS de l'interface web, 443 par
+  défaut).
+- **L'utilisateur n'a pas un droit** : donnez-lui le rôle _Read-only
+  Administrator_. Une partie qu'il ne peut pas lire (applications, VM…) est
+  laissée de côté et nommée dans les logs.
+- **Pas de température du processeur** : un NAS virtuel ou une carte sans
+  sonde.
+- Plus de détails : réglez le `LOG_LEVEL` de l'intégration sur `debug`.
+
+## Limites
+
+- Un NAS par installation ; TrueNAS 25.04 ou plus récent seulement.
+- Lecture seule, sauf les options ci-dessus : rien n'est supprimé, aucun
+  dataset, partage ou instantané n'est touché.
+- Les textes des alertes sont en anglais, tels que TrueNAS les écrit.
+- Datasets, partages, instantanés, réplications et synchronisations cloud ne
+  sont pas lus.
+- Testée sur des réponses reconstruites, pas sur un vrai NAS (voir le haut de
+  cette page).
