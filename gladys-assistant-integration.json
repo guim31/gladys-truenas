@@ -8,8 +8,8 @@
     "de": "Überwache ein TrueNAS-NAS: Pools, Festplatten, Apps, VMs, Warnungen, Prozessor, Speicher.",
     "es": "Supervise un NAS TrueNAS: pools, discos, aplicaciones, VM, alertas, procesador, memoria."
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/guim31/gladys-truenas:1.0.0",
+  "version": "1.0.1",
+  "docker_image": "ghcr.io/guim31/gladys-truenas:1.0.1",
   "gladys_version": ">=5.1.0",
   "cover_image": "https://raw.githubusercontent.com/guim31/gladys-truenas/main/cover.png",
   "categories": ["network"],

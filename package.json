@@ -1,6 +1,6 @@
 {
   "name": "gladys-truenas",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Gladys Assistant integration for a TrueNAS NAS: pools, disks, apps, VMs, alerts and updates over the local API.",
   "type": "module",

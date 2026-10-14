@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-14
+
 ### Added
 
 - Monitor a TrueNAS NAS (Community Edition / SCALE 25.04 or later) over its
@@ -35,4 +37,5 @@ the notes of the version's GitHub Release.
 - English, French, German and Spanish feature names, states, messages and
   documentation.
 
-[Unreleased]: https://github.com/guim31/gladys-truenas/commits/main
+[Unreleased]: https://github.com/guim31/gladys-truenas/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-truenas/releases/tag/v1.0.1
