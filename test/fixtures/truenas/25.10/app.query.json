@@ -1,0 +1,86 @@
+[
+  {
+    "name": "jellyfin",
+    "id": "jellyfin",
+    "state": "RUNNING",
+    "upgrade_available": true,
+    "latest_version": "1.2.3",
+    "image_updates_available": false,
+    "custom_app": false,
+    "migrated": false,
+    "human_version": "10.10.7_1.2.3",
+    "version": "1.2.3",
+    "metadata": {
+      "name": "jellyfin",
+      "train": "community"
+    },
+    "active_workloads": {
+      "containers": 1,
+      "used_ports": [],
+      "container_details": [],
+      "volumes": [],
+      "images": [],
+      "networks": []
+    },
+    "notes": null,
+    "portals": {},
+    "version_details": null,
+    "config": null
+  },
+  {
+    "name": "nextcloud",
+    "id": "nextcloud",
+    "state": "STOPPED",
+    "upgrade_available": false,
+    "latest_version": "1.2.3",
+    "image_updates_available": false,
+    "custom_app": false,
+    "migrated": false,
+    "human_version": "10.10.7_1.2.3",
+    "version": "1.2.3",
+    "metadata": {
+      "name": "nextcloud",
+      "train": "community"
+    },
+    "active_workloads": {
+      "containers": 0,
+      "used_ports": [],
+      "container_details": [],
+      "volumes": [],
+      "images": [],
+      "networks": []
+    },
+    "notes": null,
+    "portals": {},
+    "version_details": null,
+    "config": null
+  },
+  {
+    "name": "home-assistant",
+    "id": "home-assistant",
+    "state": "RUNNING",
+    "upgrade_available": false,
+    "latest_version": "1.2.3",
+    "image_updates_available": true,
+    "custom_app": false,
+    "migrated": false,
+    "human_version": "10.10.7_1.2.3",
+    "version": "1.2.3",
+    "metadata": {
+      "name": "home-assistant",
+      "train": "community"
+    },
+    "active_workloads": {
+      "containers": 1,
+      "used_ports": [],
+      "container_details": [],
+      "volumes": [],
+      "images": [],
+      "networks": []
+    },
+    "notes": null,
+    "portals": {},
+    "version_details": null,
+    "config": null
+  }
+]

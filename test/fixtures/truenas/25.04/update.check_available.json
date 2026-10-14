@@ -1,0 +1,24 @@
+{
+  "status": "AVAILABLE",
+  "version": "25.04.2.7",
+  "changes": [
+    {
+      "operation": "upgrade",
+      "old": {
+        "name": "TrueNAS",
+        "version": "25.04.2.6"
+      },
+      "new": {
+        "name": "TrueNAS",
+        "version": "25.04.2.7"
+      }
+    }
+  ],
+  "notice": null,
+  "notes": null,
+  "release_notes_url": "https://www.truenas.com/docs/scale/25.04/gettingstarted/scalereleasenotes/",
+  "changelog": "",
+  "filename": "TrueNAS-SCALE-25.04.2.7.update",
+  "filesize": 1700000000,
+  "checksum": "0000000000000000000000000000000000000000000000000000000000000000"
+}

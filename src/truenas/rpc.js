@@ -98,7 +98,6 @@ export class RpcConnection {
         // A NAS that stops answering on an open socket: start again on a new one.
         this.close();
       }, timeoutMs);
-      timer.unref?.();
       this.pending.set(id, { method, resolve, reject, timer });
       try {
         this.socket.send(JSON.stringify({ jsonrpc: '2.0', id, method, params }));

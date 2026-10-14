@@ -30,6 +30,23 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration keeps and sends:
+
+- **The API key** of TrueNAS lives in the Gladys configuration only. It is
+  sent to the NAS in the login call, over HTTPS (secure WebSocket) only: an
+  `http://` address is refused before anything is sent, since TrueNAS revokes
+  a key used over plain HTTP. It is never logged, never written under `/data`
+  and never sent to Gladys.
+- **`/data/truenas-state.json`** holds what the scene triggers compare with:
+  the host id of the NAS (a hash TrueNAS derives from `/etc/hostid`), the
+  state of each pool by guid and the ids of the active alerts. No secret.
+- **Network**: one WebSocket to the address of the NAS configured by the
+  user, on the local network. Nothing else is contacted. Accepting a
+  self-signed certificate is an option, off by default.
+- **Commands**: reading by default. Starting and stopping apps and VMs, and
+  restarting or shutting down the NAS, are refused unless the user allows them
+  in the configuration, and TrueNAS refuses them anyway to a read-only key.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+TrueNAS and the devices the integration talks to.

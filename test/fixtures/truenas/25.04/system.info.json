@@ -1,0 +1,27 @@
+{
+  "version": "25.04.2.6",
+  "buildtime": {
+    "$date": 1790000000000
+  },
+  "hostname": "truenas",
+  "physmem": 34359738368,
+  "model": "Intel(R) Core(TM) i3-9100 CPU @ 3.60GHz",
+  "cores": 4,
+  "physical_cores": 4,
+  "loadavg": [0.31, 0.42, 0.4],
+  "uptime": "2 days, 1:02:03.456789",
+  "uptime_seconds": 176523.45,
+  "system_serial": null,
+  "system_product": "To Be Filled By O.E.M.",
+  "system_product_version": "0123456789",
+  "license": null,
+  "boottime": {
+    "$date": 1791823477000
+  },
+  "datetime": {
+    "$date": 1792000000000
+  },
+  "timezone": "Europe/Paris",
+  "system_manufacturer": "Supermicro",
+  "ecc_memory": true
+}

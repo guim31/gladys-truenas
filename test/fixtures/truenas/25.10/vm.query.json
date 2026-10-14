@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "debian",
+    "description": "",
+    "vcpus": 1,
+    "memory": 2048,
+    "min_memory": null,
+    "autostart": true,
+    "time": "LOCAL",
+    "bootloader": "UEFI",
+    "cores": 2,
+    "threads": 1,
+    "hyperv_enlightenments": false,
+    "shutdown_timeout": 90,
+    "cpu_mode": "CUSTOM",
+    "cpu_model": null,
+    "devices": [],
+    "display_available": false,
+    "status": {
+      "state": "RUNNING",
+      "pid": 4242,
+      "domain_state": "RUNNING"
+    }
+  },
+  {
+    "id": 2,
+    "name": "windows",
+    "description": "",
+    "vcpus": 2,
+    "memory": 8192,
+    "min_memory": null,
+    "autostart": false,
+    "time": "LOCAL",
+    "bootloader": "UEFI",
+    "cores": 2,
+    "threads": 1,
+    "hyperv_enlightenments": true,
+    "shutdown_timeout": 90,
+    "cpu_mode": "HOST-PASSTHROUGH",
+    "cpu_model": null,
+    "devices": [],
+    "display_available": true,
+    "status": {
+      "state": "STOPPED",
+      "pid": null,
+      "domain_state": "SHUTOFF"
+    }
+  }
+]

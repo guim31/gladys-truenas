@@ -1,0 +1,245 @@
+[
+  {
+    "id": 1,
+    "name": "tank",
+    "guid": "8811223344556677001",
+    "status": "ONLINE",
+    "path": "/mnt/tank",
+    "scan": {
+      "function": "SCRUB",
+      "state": "FINISHED",
+      "start_time": {
+        "$date": 1791560800000
+      },
+      "end_time": {
+        "$date": 1791568000000
+      },
+      "percentage": 100.0,
+      "bytes_to_process": 3900000000000,
+      "bytes_processed": 3900000000000,
+      "bytes_issued": 3900000000000,
+      "pause": null,
+      "errors": 0,
+      "total_secs_left": null
+    },
+    "expand": null,
+    "is_upgraded": true,
+    "healthy": true,
+    "warning": false,
+    "status_code": null,
+    "status_detail": null,
+    "size": 15994458210304,
+    "allocated": 7997229105152,
+    "free": 7997229105152,
+    "freeing": 0,
+    "dedup_table_size": 0,
+    "dedup_table_quota": "auto",
+    "fragmentation": "3",
+    "size_str": "15994458210304",
+    "allocated_str": "7997229105152",
+    "free_str": "7997229105152",
+    "freeing_str": "0",
+    "autotrim": {
+      "parsed": "off",
+      "rawvalue": "off",
+      "source": "DEFAULT",
+      "value": "off"
+    },
+    "topology": {
+      "data": [
+        {
+          "name": "raidz1-0",
+          "type": "RAIDZ1",
+          "path": null,
+          "guid": "1234",
+          "status": "ONLINE",
+          "stats": {
+            "timestamp": 1,
+            "read_errors": 0,
+            "write_errors": 0,
+            "checksum_errors": 0,
+            "ops": [0, 0, 0, 0, 0, 0, 0],
+            "bytes": [0, 0, 0, 0, 0, 0, 0],
+            "size": 0,
+            "allocated": 0,
+            "fragmentation": 0,
+            "self_healed": 0,
+            "configured_ashift": 12,
+            "logical_ashift": 12,
+            "physical_ashift": 12
+          },
+          "children": [
+            {
+              "name": "sda2",
+              "type": "DISK",
+              "path": null,
+              "guid": "1234",
+              "status": "ONLINE",
+              "stats": {
+                "timestamp": 1,
+                "read_errors": 0,
+                "write_errors": 0,
+                "checksum_errors": 0,
+                "ops": [0, 0, 0, 0, 0, 0, 0],
+                "bytes": [0, 0, 0, 0, 0, 0, 0],
+                "size": 0,
+                "allocated": 0,
+                "fragmentation": 0,
+                "self_healed": 0,
+                "configured_ashift": 12,
+                "logical_ashift": 12,
+                "physical_ashift": 12
+              },
+              "children": [],
+              "device": "sda",
+              "disk": "sda",
+              "unavail_disk": null
+            },
+            {
+              "name": "sdb2",
+              "type": "DISK",
+              "path": null,
+              "guid": "1234",
+              "status": "ONLINE",
+              "stats": {
+                "timestamp": 1,
+                "read_errors": 0,
+                "write_errors": 0,
+                "checksum_errors": 0,
+                "ops": [0, 0, 0, 0, 0, 0, 0],
+                "bytes": [0, 0, 0, 0, 0, 0, 0],
+                "size": 0,
+                "allocated": 0,
+                "fragmentation": 0,
+                "self_healed": 0,
+                "configured_ashift": 12,
+                "logical_ashift": 12,
+                "physical_ashift": 12
+              },
+              "children": [],
+              "device": "sdb",
+              "disk": "sdb",
+              "unavail_disk": null
+            },
+            {
+              "name": "sdc2",
+              "type": "DISK",
+              "path": null,
+              "guid": "1234",
+              "status": "ONLINE",
+              "stats": {
+                "timestamp": 1,
+                "read_errors": 0,
+                "write_errors": 0,
+                "checksum_errors": 0,
+                "ops": [0, 0, 0, 0, 0, 0, 0],
+                "bytes": [0, 0, 0, 0, 0, 0, 0],
+                "size": 0,
+                "allocated": 0,
+                "fragmentation": 0,
+                "self_healed": 0,
+                "configured_ashift": 12,
+                "logical_ashift": 12,
+                "physical_ashift": 12
+              },
+              "children": [],
+              "device": "sdc",
+              "disk": "sdc",
+              "unavail_disk": null
+            }
+          ],
+          "device": null,
+          "disk": null,
+          "unavail_disk": null
+        }
+      ],
+      "log": [],
+      "cache": [],
+      "spare": [],
+      "special": [],
+      "dedup": []
+    }
+  },
+  {
+    "id": 2,
+    "name": "backup",
+    "guid": "8811223344556677002",
+    "status": "ONLINE",
+    "path": "/mnt/backup",
+    "scan": {
+      "function": "SCRUB",
+      "state": "FINISHED",
+      "start_time": {
+        "$date": 1788540400000
+      },
+      "end_time": {
+        "$date": 1788544000000
+      },
+      "percentage": 100.0,
+      "bytes_to_process": 3900000000000,
+      "bytes_processed": 3900000000000,
+      "bytes_issued": 3900000000000,
+      "pause": null,
+      "errors": 2,
+      "total_secs_left": null
+    },
+    "expand": null,
+    "is_upgraded": true,
+    "healthy": true,
+    "warning": false,
+    "status_code": null,
+    "status_detail": null,
+    "size": 3985729650688,
+    "allocated": 3587156685619,
+    "free": 398572965069,
+    "freeing": 0,
+    "dedup_table_size": 0,
+    "dedup_table_quota": "auto",
+    "fragmentation": "11",
+    "size_str": "3985729650688",
+    "allocated_str": "3587156685619",
+    "free_str": "398572965069",
+    "freeing_str": "0",
+    "autotrim": {
+      "parsed": "off",
+      "rawvalue": "off",
+      "source": "DEFAULT",
+      "value": "off"
+    },
+    "topology": {
+      "data": [
+        {
+          "name": "sdd1",
+          "type": "DISK",
+          "path": null,
+          "guid": "1234",
+          "status": "ONLINE",
+          "stats": {
+            "timestamp": 1,
+            "read_errors": 0,
+            "write_errors": 0,
+            "checksum_errors": 0,
+            "ops": [0, 0, 0, 0, 0, 0, 0],
+            "bytes": [0, 0, 0, 0, 0, 0, 0],
+            "size": 0,
+            "allocated": 0,
+            "fragmentation": 0,
+            "self_healed": 0,
+            "configured_ashift": 12,
+            "logical_ashift": 12,
+            "physical_ashift": 12
+          },
+          "children": [],
+          "device": "sdd",
+          "disk": "sdd",
+          "unavail_disk": null
+        }
+      ],
+      "log": [],
+      "cache": [],
+      "spare": [],
+      "special": [],
+      "dedup": []
+    }
+  }
+]

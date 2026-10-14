@@ -1,0 +1,48 @@
+[
+  {
+    "id": "tank",
+    "type": "FILESYSTEM",
+    "name": "tank",
+    "pool": "tank",
+    "encrypted": false,
+    "mountpoint": "/mnt/tank",
+    "used": {
+      "parsed": 5331486070784,
+      "rawvalue": "5331486070784",
+      "value": "5331486070784",
+      "source": "NONE",
+      "source_info": null
+    },
+    "available": {
+      "parsed": 5331486070784,
+      "rawvalue": "5331486070784",
+      "value": "5331486070784",
+      "source": "NONE",
+      "source_info": null
+    },
+    "children": []
+  },
+  {
+    "id": "backup",
+    "type": "FILESYSTEM",
+    "name": "backup",
+    "pool": "backup",
+    "encrypted": false,
+    "mountpoint": "/mnt/backup",
+    "used": {
+      "parsed": 3487156685619,
+      "rawvalue": "3487156685619",
+      "value": "3487156685619",
+      "source": "NONE",
+      "source_info": null
+    },
+    "available": {
+      "parsed": 387156685619,
+      "rawvalue": "387156685619",
+      "value": "387156685619",
+      "source": "NONE",
+      "source_info": null
+    },
+    "children": []
+  }
+]

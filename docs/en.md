@@ -1,61 +1,212 @@
-# Demo Devices Template
+# TrueNAS
 
-This is the user documentation of the integration. Gladys re-hosts this file
-and shows a permanent **Documentation** link to it in the Configuration screen
-(in the user's language, with English as the fallback) — it is when
-configuring that the user needs it most. Keep the short onboarding hints in
-the `section` blocks of the manifest `config_schema`; put the long
-step-by-step (screenshots, troubleshooting…) here.
+This integration follows a **TrueNAS** NAS (Community Edition, formerly
+SCALE, version 25.04 or later) from Gladys, over its local API: CPU, memory,
+temperatures, ZFS pools, disks, apps, virtual machines, alerts and updates.
+It fires scenes when a pool is degraded or when TrueNAS raises an alert, and
+puts the NAS on the dashboard.
+
+> **Not affiliated with iXsystems.** TrueNAS is a trademark of iXsystems,
+> Inc., named here only to describe compatibility.
+
+> **Developed without the hardware: feedback welcome.** No TrueNAS was
+> available while writing this integration: it reads the API as the TrueNAS
+> middleware documents it (25.04, 25.10 and 26.0) and was tested against
+> answers rebuilt from it. Tell us how it behaves on your NAS:
+> [github.com/guim31/gladys-truenas/issues](https://github.com/guim31/gladys-truenas/issues).
 
 ## What you get
 
-Six demo devices show up after installation: a weather station (real data
-from Open-Meteo), a switch, a dimmable light, a smart plug with power
-metering, a motion sensor and a camera.
+Nothing is created on your behalf: the **Discover** tab of the integration
+lists the NAS, its pools, disks, apps and virtual machines, and you add the
+ones you want to follow. Feature names and states are in the language chosen
+in the configuration.
+
+### The NAS
+
+| Feature             | What it says                                                      |
+| ------------------- | ----------------------------------------------------------------- |
+| Online              | 1 while the NAS answers, 0 after two failed reads in a row        |
+| CPU                 | CPU use, in %                                                     |
+| Memory              | Memory in use, in % (the ZFS cache counts as used, as in TrueNAS) |
+| CPU temperature     | The hottest core, in °C (absent on a NAS without sensor)          |
+| Uptime              | In days                                                           |
+| TrueNAS version     | e.g. 25.10.1                                                      |
+| Update available    | 1 when TrueNAS offers a newer version (checked every 6 hours)     |
+| Active alerts       | The number of alerts not dismissed                                |
+| Highest alert level | None, Info, Notice, Warning, Error, Critical, Alert or Emergency  |
+
+### Pools
+
+One device per ZFS pool:
+
+| Feature               | What it says                                                                  |
+| --------------------- | ----------------------------------------------------------------------------- |
+| State                 | Online, Errors, Degraded, Offline, Faulted, Unavailable, Removed or Suspended |
+| Alert                 | 1 when the state is anything but Online                                       |
+| Space used            | In %, as the TrueNAS storage page counts it (parity excluded)                 |
+| Free space            | In GB                                                                         |
+| Capacity              | In GB, used plus free                                                         |
+| Days since last scrub | Since the end of the last scrub that finished                                 |
+| Last scrub errors     | The errors that scrub found                                                   |
+
+_Errors_ means the pool is online, but ZFS saw read, write or checksum
+errors on one of its disks.
+
+### Disks
+
+One device per disk, named after its serial number (the name sda, sdb… moves
+at reboot):
+
+| Feature     | What it says                                                            |
+| ----------- | ----------------------------------------------------------------------- |
+| Temperature | In °C, read every 5 minutes; the last value stays while the disk sleeps |
+| State       | No SMART alert, SMART warning or SMART test failed                      |
+| Alert       | 1 on a SMART warning or a failed SMART test                             |
+
+TrueNAS 25.10 removed SMART tests from its API: the state comes from the
+SMART alerts TrueNAS raises for the disk. On 25.04, a failed last self-test
+counts too.
+
+### Apps and virtual machines
+
+One device per app and per virtual machine (and, on 25.04 and 25.10, per
+Incus instance or container):
+
+| Feature          | What it says                                                              |
+| ---------------- | ------------------------------------------------------------------------- |
+| Running          | 1 when it runs                                                            |
+| State            | Running, Stopped, Deploying, Starting, Stopping, Crashed, Paused or Error |
+| Update available | Apps only: a new version of the app or of its image                       |
+| Start / stop     | Only with **Allow starting and stopping apps and VMs** (see below)        |
+
+Stopping a VM is the graceful shutdown, never a forced power off.
+
+## Before you start
+
+### TrueNAS version
+
+TrueNAS **25.04 or later** (Community Edition, formerly SCALE). The JSON-RPC
+API this integration uses does not exist on TrueNAS CORE nor on SCALE 24.10
+and older.
+
+### A user and an API key
+
+1. In TrueNAS, **Credentials → Users → Add**: a user `gladys`, with the
+   _Read-only Administrator_ role (the built-in privilege group
+   `truenas_readonly_administrators`). No shell, no SMB access needed.
+2. Log in as that user (or as an administrator, for that user), open the user
+   menu at the top right, **API Keys → Add**, and copy the key: TrueNAS shows
+   it once.
+
+A read-only key is enough for everything but the commands:
+
+- starting and stopping apps and VMs needs a user with the `APPS_WRITE` and
+  `VM_WRITE` roles (a custom privilege);
+- restarting and shutting down the NAS needs a full administrator.
+
+### HTTPS and the certificate
+
+TrueNAS **revokes an API key that is used over plain HTTP**: this integration
+only talks HTTPS (secure WebSocket) and refuses an address starting with
+`http://`. The certificate TrueNAS generates is self-signed: tick
+**Accept a self-signed certificate**, or install a certificate Gladys can
+verify.
 
 ## Configuration
 
-1. Open the **Configuration** tab of the integration.
-2. Set the **latitude** and **longitude** the demo weather station should
-   observe (they default to Paris), and pick your temperature unit.
-   The **refresh interval** sets how often the weather station and the
-   plug's power are read: every 5 minutes by default, every minute at most.
-3. Save: the devices appear in the **Discovery** tab, ready to be added.
+| Field                                        | Default      | Notes                                                   |
+| -------------------------------------------- | ------------ | ------------------------------------------------------- |
+| NAS address                                  |              | `192.168.1.20`, `truenas.local`, or with its HTTPS port |
+| API key                                      |              | Never written in the logs                               |
+| Accept a self-signed certificate             | off          | For a NAS on your local network                         |
+| Refresh interval                             | every minute | Every 1, 2 or 5 minutes                                 |
+| Allow starting and stopping apps and VMs     | off          | Adds the Start / stop switch                            |
+| Allow scenes to restart or shut down the NAS | off          | Needs a full administrator key                          |
+| Language of the names and states             | French       | Gladys does not tell the integration your language      |
 
-The **Prefer the local connection** toggle drives the demo plug: it reports
-the channel it actually uses as a badge (local or cloud), with an orange dot
-when it runs degraded (local refused, cloud fallback).
+Save, then use **Test the connection**: it reads the NAS at once and tells
+what it found (version, pools, disks, apps, VMs, alerts). It also tries again
+a key refused before.
 
-## Actions
+Turning on **Allow starting and stopping apps and VMs** adds a feature to the
+apps and VMs already added: open the **Discover** tab and press **Update** on
+each of them. Turning it off again refuses the switch at once.
 
-- **Test the weather provider** — performs a live request to Open-Meteo and
-  shows the current temperature and humidity under the button.
-- **Identify a device** — pick one of your devices in the list and it will
-  signal itself (the demo light "blinks" in the logs).
+## Dashboard widget
 
-## Scenes
+The **TrueNAS** widget shows the CPU and memory gauges and the CPU
+temperature, then, problems first: the most serious active alerts, a pool
+that is not online, a disk with a SMART alert, a crashed app, the update
+offered; then each pool with its use and free space, the apps and VMs
+running, and the uptime. **Refresh** reads the NAS at once. It needs no
+device added.
 
-The integration adds its own cards to the scene editor (Gladys 5.1 or
-later), under the **Integrations** category:
+## Scene triggers
 
-- **Motion detected** (trigger) — starts the scene when a demo motion sensor
-  sees something move. Optionally pick the sensor and what moved (person,
-  animal); left empty, any detection matches. The following actions can
-  read what moved with `{{triggerEvent.data.target}}`.
-- **Identify a device** (action) — makes the chosen device signal itself.
-  It returns whether the device could signal itself, so the following
-  actions can depend on it.
+**Pool degraded**: a pool goes from Online to Errors, Degraded, Offline,
+Faulted, Unavailable, Removed or Suspended, and again if it gets worse
+(Degraded to Faulted). Filter: one pool, or every pool. Variables: the NAS,
+the pool, its state.
 
-## Dashboard
+**New TrueNAS alert**: TrueNAS raised an alert (a SMART error, a pool, an
+update, a certificate about to expire…), once per alert. Filter: the levels
+(Info to Emergency; empty means any). Variables: the NAS, the level
+(`info` … `emergency`), the text of the alert (in English, as TrueNAS writes
+it) and its class (e.g. `SMARTUncorrectedErrors`).
 
-Add the **Demo status** widget to a dashboard: it shows the live
-temperature of the weather station and the power of the office plug, the
-connection the plug currently uses (orange when degraded) and the observed
-location. Its **Identify the light** button makes the demo light signal
-itself.
+Both fire on transitions only, for pools and alerts whether added to Gladys
+or not, and remember what they announced across restarts: the alerts present
+at installation are not announced.
+
+## Scene actions
+
+**Restart the TrueNAS NAS** and **Shut down the TrueNAS NAS** are refused
+unless **Allow scenes to restart or shut down the NAS** is ticked, and need
+the key of a full administrator. A NAS shut down must be turned back on by
+hand, or by Wake-on-LAN.
+
+## Scene ideas
+
+- **New TrueNAS alert**, levels Error to Emergency → send the text of the
+  alert to your phone: _"{{triggerEvent.data.nas_name}}:
+  {{triggerEvent.data.text}}"_.
+- **Pool degraded** → a message, and a red light in the office until it is
+  fixed.
+- Every first Sunday of the month, if **Days since last scrub** of a pool is
+  above 35 → remind yourself to check the scrub tasks.
+- **Highest alert level** is Critical in the morning → announce it on the
+  speaker.
+
+## How often the NAS is read
+
+At every refresh (every minute by default), on one WebSocket kept open
+between reads: the system information, three reporting graphs (CPU, memory,
+CPU temperature), the alerts, the pools and their root dataset, the apps and
+the VMs: about ten light calls. The disks and their temperatures every 5
+minutes; the update check every 6 hours (it makes the NAS ask the TrueNAS
+update server). Only the values that change are sent to Gladys, every value
+again after 6 hours.
 
 ## Troubleshooting
 
-The integration logs everything it does: check the integration logs from the
-Gladys UI (or `docker logs` on the host) with `LOG_LEVEL=debug` for the full
-detail.
+- **API key refused**: wrong, expired or revoked. A key used once over
+  `http://` is revoked by TrueNAS (an _API key revoked_ alert says so): create
+  a new one, and keep the address without `http://`.
+- **HTTPS certificate refused**: tick **Accept a self-signed certificate**.
+- **No TrueNAS 25.04+ API at this address**: an older TrueNAS, TrueNAS CORE,
+  or another port (the HTTPS port of the web interface, 443 by default).
+- **The user lacks a right**: give it the _Read-only Administrator_ role. A
+  part it may not read (apps, VMs…) is left out and named in the logs.
+- **No CPU temperature**: a virtual NAS or a board without sensor.
+- More detail: set the `LOG_LEVEL` of the integration to `debug`.
+
+## Limits
+
+- One NAS per installation; TrueNAS 25.04 or later only.
+- Read only, but for the options above: nothing is deleted, no dataset,
+  share or snapshot is touched.
+- The texts of the alerts are in English, as TrueNAS writes them.
+- Datasets, shares, snapshots, replication and cloud sync tasks are not read.
+- Tested against rebuilt answers, not on a real NAS (see the top of this
+  page).

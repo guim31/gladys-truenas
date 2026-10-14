@@ -19,7 +19,7 @@
 // guim31/gladys-qnap.)
 // -----------------------------------------------------------------------------
 
-import { POOL_STATES, poolState } from './truenas/model.js';
+import { POOL_STATES } from './truenas/model.js';
 
 const object = (value) =>
   value && typeof value === 'object' && !Array.isArray(value) ? value : {};
@@ -53,7 +53,7 @@ export class Watcher {
   pools(pools) {
     const events = [];
     for (const pool of pools ?? []) {
-      const state = poolState(pool.status);
+      const { state } = pool;
       const previous = this.saved.pools[pool.key];
       this.saved.pools[pool.key] = state;
       if (previous === undefined || !POOL_STATES[previous]) {

@@ -1,0 +1,21 @@
+{
+  "code": "NORMAL",
+  "error": null,
+  "status": {
+    "current_version": {
+      "train": "TrueNAS-25.10",
+      "profile": "GENERAL",
+      "matches_profile": true
+    },
+    "new_version": {
+      "version": "25.10.2",
+      "manifest": {
+        "filename": "TrueNAS-SCALE-25.10.2.update",
+        "version": "25.10.2"
+      },
+      "release_notes": null,
+      "release_notes_url": "https://www.truenas.com/docs/scale/25.10/gettingstarted/scalereleasenotes/"
+    }
+  },
+  "update_download_progress": null
+}
